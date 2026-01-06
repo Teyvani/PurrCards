@@ -1,0 +1,21 @@
+.header {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: start;
+  gap: 20px;
+  padding: 10px;
+  background-color: lawngreen;
+}
+
+.menu {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  justify-content: center;
+  align-content: center;
+}
+
+.menu-text {
+  align-content: center;
+}
