@@ -21,7 +21,6 @@ export class User {
   emailToken: string | null;
 
   @Column({ default: false })
-  @Exclude()
   emailValidated: boolean;
 
   @Column({ enum: ['user', 'admin'], default: 'user' })

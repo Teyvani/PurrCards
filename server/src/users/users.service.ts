@@ -1,7 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { bcrypt } from 'bcrypt';
+import bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
 
 /*It's only temporary, I'm still just learning, I'll add TypeORM later
@@ -44,6 +44,21 @@ export class UsersService {
     });
 
     return await this.usersRepository.save(user);
+  }
+
+  async findByUsernameOrEmail(usernameOrEmail: string): Promise<User | null> {
+    return await this.usersRepository
+      .createQueryBuilder('user')
+      .where('user.username = :identifier', { identifier: usernameOrEmail })
+      .orWhere('user.email = :identifier', { identifier: usernameOrEmail })
+      .getOne();
+  }
+
+  async checkPassword(
+    guessPassword: string,
+    realPassword: string,
+  ): Promise<boolean> {
+    return await bcrypt.compare(guessPassword, realPassword);
   }
 
   async checkUniqueness(
