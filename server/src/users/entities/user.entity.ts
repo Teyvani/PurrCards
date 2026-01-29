@@ -20,6 +20,10 @@ export class User {
   @Exclude()
   emailToken: string | null;
 
+  @Column({ default: null })
+  @Exclude()
+  refreshJwtToken: string | null;
+
   @Column({ default: false })
   emailValidated: boolean;
 
