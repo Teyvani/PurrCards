@@ -1,7 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from 'typeorm';
 import { Exclude } from 'class-transformer';
-
-@Entity()
+import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -16,17 +23,31 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column({ default: null })
+  @Column({ nullable: true })
   @Exclude()
-  emailToken: string | null;
+  emailToken: string;
 
-  @Column({ default: null })
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user, {
+    cascade: true,
+  })
   @Exclude()
-  refreshJwtToken: string | null;
+  refreshJwtTokens: RefreshToken[];
+
+  @Column({ nullable: true })
+  passwordResetToken: string;
+
+  @Column({ nullable: true })
+  passwordResetExp: Date;
 
   @Column({ default: false })
   emailValidated: boolean;
 
   @Column({ enum: ['user', 'admin'], default: 'user' })
   role: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
