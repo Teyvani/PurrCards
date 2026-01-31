@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
+import nodemailer from 'nodemailer';
 
 @Injectable()
 export class EmailService {
@@ -14,5 +14,27 @@ export class EmailService {
         pass: this.configService.get('SMTP_PASS'),
       },
     });
+  }
+
+  async sendEmailConfirmation(
+    username: string,
+    email: string,
+    token: string,
+  ): Promise<void> {
+    const url = `http://${this.configService.get('HOST_FOR_EMAIL')}:${this.configService.get('PORT_FOR_EMAIL')}/confirm-token?token=${token}`;
+
+    const info = await this.transporter.sendMail({
+      from: `"PurrCards" <${this.configService.get('SMTP_USER')}>`,
+      to: email,
+      subject: 'Confirm your email',
+      text: `To confirm your registration follow the link: ${url}`,
+      html: `
+      <h1>Dear ${username}</h1>
+      <h1>Welcome to the PurrCards</h1>
+      <p>Please, confirm your registration by following link below</p>
+      <a href="${url}">Confirm Email</a>`,
+    });
+
+    console.log('Message send: ', info.messageId);
   }
 }

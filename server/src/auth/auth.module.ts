@@ -6,10 +6,12 @@ import { UsersModule } from 'src/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 
 import { RefreshToken } from './entities/refresh-token.entity';
+import { EmailModule } from 'src/email/email.module';
 
 @Module({
   imports: [
     UsersModule,
+    EmailModule,
     JwtModule.register({}),
     TypeOrmModule.forFeature([RefreshToken]),
   ],

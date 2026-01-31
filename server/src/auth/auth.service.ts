@@ -6,6 +6,9 @@ import { LoginDto } from './dto/login.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { Repository } from 'typeorm';
+import { RegisterDto } from './dto/register.dto';
+import crypto from 'crypto';
+import { EmailService } from '../email/email.service';
 
 export interface AuthResponse {
   access_token: string;
@@ -25,9 +28,25 @@ export class AuthService {
     private usersServise: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private emailService: EmailService,
     @InjectRepository(RefreshToken)
     private refreshTokenRepository: Repository<RefreshToken>,
   ) {}
+
+  async register(registerDto: RegisterDto): Promise<void> {
+    const { username, password, email } = registerDto;
+
+    const emailToken = crypto.randomBytes(32).toString();
+
+    const user = await this.usersServise.create(
+      username,
+      password,
+      email,
+      emailToken,
+    );
+
+    this.emailService.sendEmailConfirmation(username, email, emailToken);
+  }
 
   async login(loginDto: LoginDto): Promise<AuthResponse> {
     const user = await this.usersServise.findByUsernameOrEmail(
