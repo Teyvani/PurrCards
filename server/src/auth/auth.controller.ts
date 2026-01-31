@@ -6,6 +6,7 @@ import {
   Req,
   Body,
   UseGuards,
+  Param,
 } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { AuthGuard } from './auth.guard';
@@ -17,6 +18,15 @@ import { RegisterDto } from './dto/register.dto';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @Get('confirm-email')
+  async confirmEmail(@Param('token') token: string) {
+    await this.authService.confirmEmail(token);
+
+    return {
+      message: 'Email confirmed successfully',
+    };
+  }
 
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {

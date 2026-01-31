@@ -21,7 +21,7 @@ export class EmailService {
     email: string,
     token: string,
   ): Promise<void> {
-    const url = `http://${this.configService.get('HOST_FOR_EMAIL')}:${this.configService.get('PORT_FOR_EMAIL')}/confirm-token?token=${token}`;
+    const url = `http://${this.configService.get('HOST_FOR_EMAIL')}:${this.configService.get('PORT_FOR_EMAIL')}/auth/confirm-email?token=${token}`;
 
     const info = await this.transporter.sendMail({
       from: `"PurrCards" <${this.configService.get('SMTP_USER')}>`,

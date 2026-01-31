@@ -76,4 +76,21 @@ export class UsersService {
       emailExists: existingUsers.some((u) => u.email === email),
     };
   }
+
+  async confirmEmail(token: string): Promise<void> {
+    const user = await this.usersRepository.findOne({
+      where: { emailToken: token },
+    });
+
+    if (!user) {
+      throw new ConflictException('Invalid token');
+    }
+
+    this.usersRepository.update(user.id, {
+      emailValidated: true,
+      emailToken: undefined,
+    });
+
+    this.usersRepository.save(user);
+  }
 }

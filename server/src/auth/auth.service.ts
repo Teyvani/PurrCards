@@ -174,4 +174,8 @@ export class AuthService {
   async logout(refreshToken: string): Promise<void> {
     await this.refreshTokenRepository.delete({ token: refreshToken });
   }
+
+  async confirmEmail(token: string) {
+    await this.usersServise.confirmEmail(token);
+  }
 }
