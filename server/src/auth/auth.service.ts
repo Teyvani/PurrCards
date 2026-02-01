@@ -36,7 +36,7 @@ export class AuthService {
   async register(registerDto: RegisterDto): Promise<void> {
     const { username, password, email } = registerDto;
 
-    const emailToken = crypto.randomBytes(32).toString();
+    const emailToken = crypto.randomBytes(32).toString('hex');
 
     const user = await this.usersServise.create(
       username,

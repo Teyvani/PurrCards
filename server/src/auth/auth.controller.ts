@@ -7,6 +7,7 @@ import {
   Body,
   UseGuards,
   Param,
+  Query,
 } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { AuthGuard } from './auth.guard';
@@ -14,13 +15,17 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import strict from 'assert/strict';
 import { RegisterDto } from './dto/register.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private configService: ConfigService,
+  ) {}
 
   @Get('confirm-email')
-  async confirmEmail(@Param('token') token: string) {
+  async confirmEmail(@Query('token') token: string) {
     await this.authService.confirmEmail(token);
 
     return {
@@ -47,7 +52,7 @@ export class AuthController {
 
     res.cookie('refreshToken', refresh_token, {
       httpOnly: true,
-      secure: true,
+      secure: this.configService.get('NODE_ENV') === 'production',
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: '/auth',
     });
@@ -57,4 +62,7 @@ export class AuthController {
       user,
     };
   }
+
+  @Get('profile')
+  async getProfile() {}
 }

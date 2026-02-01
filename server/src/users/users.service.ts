@@ -33,8 +33,7 @@ export class UsersService {
       throw new ConflictException('This email is already being used.');
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = this.usersRepository.create({
       username,
@@ -86,11 +85,13 @@ export class UsersService {
       throw new ConflictException('Invalid token');
     }
 
+    if (user.emailValidated) {
+      throw new ConflictException('Email already verified');
+    }
+
     this.usersRepository.update(user.id, {
       emailValidated: true,
-      emailToken: undefined,
+      emailToken: 'null',
     });
-
-    this.usersRepository.save(user);
   }
 }
