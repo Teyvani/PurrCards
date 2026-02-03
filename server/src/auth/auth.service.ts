@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -38,12 +42,7 @@ export class AuthService {
 
     const emailToken = crypto.randomBytes(32).toString('hex');
 
-    const user = await this.usersServise.create(
-      username,
-      password,
-      email,
-      emailToken,
-    );
+    await this.usersServise.create(username, password, email, emailToken);
 
     this.emailService.sendEmailConfirmation(username, email, emailToken);
   }
@@ -96,11 +95,13 @@ export class AuthService {
     id: number;
     username: string;
     email: string;
+    role: string;
   }): Promise<{ accessToken: string; refreshJwtToken: string }> {
     const payload = {
       sub: user.id,
       username: user.username,
       email: user.email,
+      role: user.role,
     };
 
     const accessToken = this.jwtService.sign(payload, {
@@ -144,6 +145,10 @@ export class AuthService {
         secret: this.configService.get('JWT_REFRESH_SECRET'),
       });
 
+      if (!decoded) {
+        throw new ConflictException('Invalid token');
+      }
+
       const storedToken = await this.refreshTokenRepository.findOne({
         where: { token: refreshToken },
         relations: ['user'],
@@ -165,6 +170,7 @@ export class AuthService {
 
       return {
         accessToken,
+        refreshJwtToken,
       };
     } catch (error) {
       throw new Error(`Invalid refresh token: ${error.message}`);

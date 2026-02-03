@@ -13,9 +13,10 @@ import type { Response, Request } from 'express';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import strict from 'assert/strict';
 import { RegisterDto } from './dto/register.dto';
 import { ConfigService } from '@nestjs/config';
+
+import { type RequestWithUser } from './dto/request-with-user.type';
 
 @Controller('auth')
 export class AuthController {
@@ -63,6 +64,35 @@ export class AuthController {
     };
   }
 
+  @Post('refresh')
+  async refresh(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const refreshToken = req.cookies?.refreshToken;
+
+    if (!refreshToken) {
+      throw new Error('No refresh token provided');
+    }
+
+    const { accessToken, refreshJwtToken } =
+      await this.authService.refresh(refreshToken);
+
+    res.cookie('refreshToken', refreshJwtToken, {
+      httpOnly: true,
+      secure: this.configService.get('NODE_ENV') === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/auth',
+    });
+
+    return {
+      access_token: accessToken,
+    };
+  }
+
   @Get('profile')
-  async getProfile() {}
+  @UseGuards(AuthGuard)
+  async getProfile(@Req() req: RequestWithUser) {
+    return req.user;
+  }
 }
